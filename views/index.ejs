@@ -7,44 +7,43 @@
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-    <main>
-        <div id="header">
-            <h1>ClarioLive</h1>
-        </div>
-        <div id="content">
-            <div id="matches">
-                <div id="matches-buttons">
-                    <button>Today's matches</button>
-                    <button>Fixtures</button>
-                    <button>Results</button>
-                </div>
-                <div id="matches-content">
-                    <div id="todays-matches">
-                        <%= todaysMatches %>
-                    </div>
-                    <div id="fixtures">
-
-                    </div>
-                    <div id="results">
-
-                    </div>
-                </div>
+    <div id="header">
+        <h1>ClarioLive</h1>
+    </div>
+    <div id="content">
+        <div id="matches">
+            <div id="matches-buttons">
+                <button id="todays-matches-btn">Today's matches</button>
+                <button id="fixtures-btn">Fixtures</button>
+                <button id="results-btn">Results</button>
             </div>
-            <div id="competition">
-                <div id="competition-buttons">
-                    <button>Standings</button>
-                    <button>Top goal scorers</button>
+            <div id="matches-content">
+                <div id="todays-matches">
+                    <%= todaysMatches %>
                 </div>
-                <div id="competition-content">
-                    <div id="standings">
-                        <%= standings %>
-                    </div>
-                    <div id="top-goal-scorers">
+                <div id="fixtures">
 
-                    </div>
+                </div>
+                <div id="results">
+
                 </div>
             </div>
         </div>
-    </main>
+        <div id="competition">
+            <div id="competition-buttons">
+                <button id="standings-btn">Standings</button>
+                <button id="top-goal-scorers">Top goal scorers</button>
+            </div>
+            <div id="competition-content">
+                <div id="standings">
+                    <%= standings %>
+                </div>
+                <div id="top-goal-scorers">
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/script.js"></script>
 </body>
 </html>
