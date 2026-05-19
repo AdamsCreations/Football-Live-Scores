@@ -58,14 +58,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get("/",async (req, res) => {
   try{
-    const matchesRequest = await api.get("/competitions/PL/matches",{params:{dateFrom: today, dateTo: today}});
-    const matchesResponse = matchesRequest.data.matches;
-
     const standingsRequest = await api.get("/competitions/PL/standings");
     const standingsResponse = standingsRequest.data.standings[0].table;
 
     res.render("index.ejs", {
-      todaysMatches: JSON.stringify(matchesResponse.map(matchesFilter)),
       standings: JSON.stringify(standingsResponse.map(standingsFilter))
     });
 
@@ -77,12 +73,13 @@ app.get("/",async (req, res) => {
 
 app.get("/todaysMatches",async (req, res) =>{
   try{
-    const matchesRequest = await api.get("/competitions/PL/matches",{params:{dateFrom: today, dateTo: today}});
+    const localDate = req.headers["x-localDate"] || today;
+    const matchesRequest = await api.get("/competitions/PL/matches",{params:{dateFrom: localDate, dateTo: localDate}});
     const matchesResponse = matchesRequest.data.matches;
 
     res.json(matchesResponse.map(matchesFilter));
   }catch(error){
-
+    console.log(error.message);
   };
 })
 
