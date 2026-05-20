@@ -1,12 +1,13 @@
 import 'dotenv/config';
-import express, { request, response } from "express";
+import express from "express";
 import axios from "axios";
 import bodyParser from "body-parser";
+import { getCache } from './cache.js';
+import { setCache } from './cache.js';
 
 const app = express();
 const port = 3000;
-const today = new Date().toISOString().split('T')[0]; // "2026-05-15"
-const testDate = "2026-05-18"
+const today = new Date().toISOString().split('T')[0];
 const api = axios.create({
   baseURL: "http://api.football-data.org/v4",
   headers:{
@@ -57,27 +58,43 @@ app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get("/",async (req, res) => {
+  console.log("GET /");
   try{
-    const standingsRequest = await api.get("/competitions/PL/standings");
-    const standingsResponse = standingsRequest.data.standings[0].table;
-
-    res.render("index.ejs", {
-      standings: JSON.stringify(standingsResponse.map(standingsFilter))
-    });
-
+    console.log("server get cache");
+    const cache = getCache("standings");
+    if(cache){
+      console.log("cache is available");
+      res.render("index.ejs", {standings: JSON.stringify(cache)});
+    }else{
+      const standingsRequest = await api.get("/competitions/PL/standings");
+      const standingsResponse = standingsRequest.data.standings[0].table;
+      const data = standingsResponse.map(standingsFilter);
+      console.log("no cache");
+      console.log("server set cache");
+      setCache("standings", data, Date.now());
+      res.render("index.ejs", {standings: JSON.stringify(data)});
+    };
   }catch(error){
     console.log(error.message);
   };
-
 });
 
 app.get("/todaysMatches",async (req, res) =>{
   try{
-    const localDate = req.headers["x-localDate"] || today;
-    const matchesRequest = await api.get("/competitions/PL/matches",{params:{dateFrom: localDate, dateTo: localDate}});
-    const matchesResponse = matchesRequest.data.matches;
-
-    res.json(matchesResponse.map(matchesFilter));
+    const cache = getCache("todays-matches");
+    if(cache){
+      console.log("cache is available");
+      res.json(cache);
+    }else{
+      const localDate = req.headers["x-localDate"] || today;
+      const matchesRequest = await api.get("/competitions/PL/matches",{params:{dateFrom: localDate, dateTo: localDate}});
+      const matchesResponse = matchesRequest.data.matches;
+      const data = matchesResponse.map(matchesFilter);
+      console.log("no cache");
+      console.log("server set cache");
+      setCache("todays-matches", data, Date.now());
+      res.json(data);
+    };
   }catch(error){
     console.log(error.message);
   };
@@ -85,10 +102,19 @@ app.get("/todaysMatches",async (req, res) =>{
 
 app.get("/fixtures",async (req, res) => {
   try{
-    const matchesRequest = await api.get("/competitions/PL/matches",{params:{status: "SCHEDULED"}});
-    const matchesResponse = matchesRequest.data.matches;
-    console.log(matchesResponse.map(matchesFilter))
-    res.json(matchesResponse.map(matchesFilter));
+    const cache = getCache("fixtures");
+    if(cache){
+      console.log("cache is available");
+      res.json(cache);
+    }else{
+      const matchesRequest = await api.get("/competitions/PL/matches",{params:{status: "SCHEDULED"}});
+      const matchesResponse = matchesRequest.data.matches;
+      const data = matchesResponse.map(matchesFilter);
+      console.log("no cache");
+      console.log("server set cache");
+      setCache("fixtures", data, Date.now());
+      res.json(data);
+    };
   }catch(error){
     console.log(error.message);
   };
@@ -96,11 +122,19 @@ app.get("/fixtures",async (req, res) => {
 
 app.get("/results",async (req, res) => {
   try{
-    const matchesRequest = await api.get("/competitions/PL/matches",{params:{status: "FINISHED"}});
-    const matchesResponse = matchesRequest.data.matches;
-
-    res.json(matchesResponse.map(matchesFilter));
-
+    const cache = getCache("results");
+    if(cache){
+      console.log("cache is available");
+      res.json(cache);
+    }else{
+      const matchesRequest = await api.get("/competitions/PL/matches",{params:{status: "FINISHED"}});
+      const matchesResponse = matchesRequest.data.matches;
+      const data = matchesResponse.map(matchesFilter);
+      console.log("no cache");
+      console.log("server set cache");
+      setCache("results", data, Date.now());
+      res.json(data);
+    };
   }catch(error){
     console.log(error.message);
   };
@@ -108,22 +142,39 @@ app.get("/results",async (req, res) => {
 
 app.get("/standings",async (req, res) => {
   try{
-    const standingsRequest = await api.get("/competitions/PL/standings");
-    const standingsResponse = standingsRequest.data.standings[0].table;
-
-    res.json(standingsResponse.map(standingsFilter));
+    const cache = getCache("standings");
+    if(cache){
+      console.log("cache is available");
+      res.json(cache);
+    }else{
+      const standingsRequest = await api.get("/competitions/PL/standings");
+      const standingsResponse = standingsRequest.data.standings[0].table;
+      const data = standingsResponse.map(standingsFilter);
+      console.log("no cache");
+      console.log("server set cache");
+      setCache("standings", data, Date.now());
+      res.json(data);
+    };
   }catch(error){
-
+    console.log(error.message);
   };
 })
 
 app.get("/topGoalScorers",async (req, res) =>{
   try{
-    const topGoalScorersRequest = await api.get("/competitions/PL/scorers");
-    const topGoalScorersResponse = topGoalScorersRequest.data.scorers;
-
-    res.json(topGoalScorersResponse.map(topGoalScorersFilter))
-
+    const cache = getCache("top-goal-scorers");
+    if(cache){
+      console.log("cache is available");
+      res.json(cache);
+    }else{
+      const topGoalScorersRequest = await api.get("/competitions/PL/scorers");
+      const topGoalScorersResponse = topGoalScorersRequest.data.scorers;
+      const data = topGoalScorersResponse.map(topGoalScorersFilter);
+      console.log("no cache");
+      console.log("server set cache");
+      setCache("top-goal-scorers", data, Date.now());
+      res.json(data);
+    };
   }catch(error){
     console.log(error.message);
   };
